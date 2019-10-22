@@ -19,7 +19,8 @@ from collections import Counter
 #no no yes yes yes yes target yes yes yes yes no no
 
 #This is buggy having difficulties with overlap.  Currently implementing the band-aid fix that if it's greater than the number 
-#of instances of a word than replacing just with the total (bc it's a lot)
+#of instances of a word than replacing just with the total bc in all cases I saw it was a multiplicity issue
+#e.g. they'd be seen two or four times when they only appear once (never 3)
 
 
 def make_nltktxt(komyagin):
