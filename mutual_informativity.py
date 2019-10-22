@@ -18,7 +18,9 @@ from collections import Counter
 #of 5 words:
 #no no yes yes yes yes target yes yes yes yes no no
 
-#five words seems like a lot especially when it's stripped so trying with fewer.  
+#This is buggy having difficulties with overlap.  Currently implementing the band-aid fix that if it's greater than the number 
+#of instances of a word than replacing just with the total (bc it's a lot)
+
 
 def make_nltktxt(komyagin):
     #komyagin = komyagin.lower()
@@ -63,16 +65,28 @@ def concordance_fancy(ci, word, width=150, lines=100):
     
     half_width =  (width - len(word) - 2) // 2
     context = width // 4 # approx number of words of context
-
+    num = 5
+    problem_index = None
     results = []
     offsets = ci.offsets(word)
+   # if len(offsets) > 1:
+    #    distances = [j-i for i, j in zip(offsets[:-1], offsets[1:])] 
+     #   distances1 = list(enumerate(distances))
+      #  for i in distances1:
+       #     if i[1] < 10:
+        #        num = round((i[1]-1)/2)
+         #       problem_index = offsets[0]
+          #      print(problem_index)
+           #     print(ci._tokens[23])
     if offsets:
+        #print([offsets, word])
         for i in offsets:
             query_word = ci._tokens[i]
             #print("q_w" + query_word)
                 # Find the context of query word.
             left_context = ci._tokens[max(0, i - context) : i]
             right_context = ci._tokens[i + 1 : i + context]
+           # print(right_context)
                 # Create the pretty lines with the query_word in the middle.
             left_print = " ".join(left_context)[-half_width:]
             right_print = " ".join(right_context)[:half_width]
@@ -80,45 +94,55 @@ def concordance_fancy(ci, word, width=150, lines=100):
             line_print = " ".join([left_print, query_word, right_print])
                 # Create the ConcordanceLine
             results.append(line_print)
-    return results
+    return ([num, results, problem_index])
 
 #gathers all contexts of the word in results
 def mutual_informativity(ci, target_word, target_word2, total_count):
     results0 = []
     concordance1 = concordance_fancy(ci, target_word)
-    for i in concordance1:
+    num = 5
+    #print(num)
+    for i in concordance1[1]:
         #print(i)
         n = i.split()
         for z in n:
             results0.append(z)
     token_fix = list(enumerate(results0))
     results1 = []
+    counter = -1
     for z in token_fix:
+        counter += 1
         if z[1] == target_word:
-            if z[0] < 5:
-                cat = results0[0:(z[0]+5)]
-                #print(cat)
+            if z[0] < (num):
+                cat = results0[0:(z[0]+num)]
+                results1.append(cat)
             elif z[0] > (len(results0) - 1):
-                cat = results0[(z[0] -5):(len(results0)-1)]
-                #print(cat)
+                cat = results0[(z[0] -num):(len(results0)-1)]
+                results1.append(cat)
             else: 
-                cat = results0[(z[0] -5):(z[0] + 5)]
-                #print(cat)
-            results1.append(cat)
+                cat = results0[(z[0] -num):(z[0] + num)]
+                results1.append(cat)
+           
     results = []
     for i in results1:
         for n in i:
             results.append(n)
 #this will return the count of target_word2 in the vicinity of target_word1
     prob_numx = Counter(results)
-    prob_denom = len(results)
+    prob_denom = len(results0)
     prob_num = prob_numx[target_word2]
-    P_rc = prob_num/prob_denom
+    P_rc = prob_num/total_count
     P_r = (count(ci, target_word))/total_count
     P_c = (count(ci, target_word2))/total_count
     if P_rc == 0:
-        print([z[0],concordance1])
+        print([num, concordance1, "ERROR"])
         return ([target_word, target_word2, "ERROR"])
+    elif P_rc > P_c:
+        mutinf = math.log10(P_c*P_r*P_c)
+        print([P_rc, P_c, P_r])
+    elif P_rc > P_r:
+        mutinf = math.log10(P_r*P_r*P_c)
+        print([P_rc, P_c, P_r])
     else:
         mutinf = math.log10(P_rc*P_r*P_c)
     return ([target_word, target_word2, mutinf])
