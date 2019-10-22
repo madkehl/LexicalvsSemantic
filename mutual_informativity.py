@@ -144,25 +144,20 @@ def pmi(text):
     text3 = list(enumerate(text2))
     index = 0
     for i in text3:
-        if i[0] < (len(text3)-4):
-            #print(text2[i[0] + 1])
-            item = mutual_informativity(step_2, i[1], text3[i[0] + 4][1], total_count)
-            if(item not in pmi_list):
-                pmi_list.append(item)
-        elif i[0] < (len(text3)-3):
+        if i[0] < (len(text3)-3):
             #print(text2[i[0] + 1])
             item = mutual_informativity(step_2, i[1], text3[i[0] + 3][1], total_count)
-            if(item not in pmi_list):
+            if(item not in pmi_list) & (item[0] != item[1]):
                 pmi_list.append(item)
         elif i[0] < (len(text3)-2):
             #print(text2[i[0] + 1])
             item = mutual_informativity(step_2, i[1], text3[i[0] + 2][1], total_count)
-            if(item not in pmi_list):
+            if(item not in pmi_list) & (item[0] != item[1]):
                 pmi_list.append(item)
         elif i[0] < (len(text3)-1):
             #print(text2[i[0] + 1])
             item = mutual_informativity(step_2, i[1], text3[i[0] + 1][1], total_count)
-            if(item not in pmi_list):
+            if(item not in pmi_list) & (item[0] != item[1]):
                 pmi_list.append(item)
         else:
             return(pmi_list)
