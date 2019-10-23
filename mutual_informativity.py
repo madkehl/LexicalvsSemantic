@@ -18,10 +18,7 @@ from collections import Counter
 #of 5 words:
 #no no yes yes yes yes target yes yes yes yes no no
 
-#This is buggy having difficulties with overlap.  Currently implementing the band-aid fix that if it's greater than the number 
-#of instances of a word than replacing just with the total bc in all cases I saw it was a multiplicity issue
-#e.g. they'd be seen two or four times when they only appear once (never 3)
-
+#five words seems like a lot especially when it's stripped so trying with fewer.  
 
 def make_nltktxt(komyagin):
     #komyagin = komyagin.lower()
@@ -139,13 +136,25 @@ def mutual_informativity(ci, target_word, target_word2, total_count):
         print([num, concordance1, "ERROR"])
         return ([target_word, target_word2, "ERROR"])
     elif P_rc > P_c:
-        mutinf = math.log10(P_c*P_r*P_c)
-        print([P_rc, P_c, P_r])
+        rounded = int(P_rc/P_c)
+        nr = P_rc/P_c
+        if (rounded > nr):
+            P_n = P_c - 1/total_count
+        else:
+            P_n = P_c
+        mutinf = math.log10(P_n/(P_r*P_c))
+        #print([P_rc, P_c, P_r, P_n])
     elif P_rc > P_r:
-        mutinf = math.log10(P_r*P_r*P_c)
-        print([P_rc, P_c, P_r])
+        rounded = int(P_rc/P_r)
+        nr = P_rc/P_r
+        if (rounded > nr):
+            P_n = P_c -1/total_count
+        else:
+            P_n = P_c
+        mutinf = math.log10(P_n/(P_r*P_c))
+        #print([P_rc, P_c, P_r, P_n])
     else:
-        mutinf = math.log10(P_rc*P_r*P_c)
+        mutinf = math.log10(P_rc/(P_r*P_c))
     return ([target_word, target_word2, mutinf])
 
 def count(ci, word):
@@ -169,19 +178,19 @@ def pmi(text):
     text3 = list(enumerate(text2))
     index = 0
     for i in text3:
-        if i[0] < (len(text3)-3):
+        if i[0] < (len(text3)-1):
             #print(text2[i[0] + 1])
-            item = mutual_informativity(step_2, i[1], text3[i[0] + 3][1], total_count)
+            item = mutual_informativity(step_2, i[1], text3[i[0] + 1][1], total_count)
             if(item not in pmi_list) & (item[0] != item[1]):
                 pmi_list.append(item)
-        elif i[0] < (len(text3)-2):
+        if i[0] < (len(text3)-2):
             #print(text2[i[0] + 1])
             item = mutual_informativity(step_2, i[1], text3[i[0] + 2][1], total_count)
             if(item not in pmi_list) & (item[0] != item[1]):
-                pmi_list.append(item)
-        elif i[0] < (len(text3)-1):
+                pmi_list.append(item)        
+        if i[0] < (len(text3)-3):
             #print(text2[i[0] + 1])
-            item = mutual_informativity(step_2, i[1], text3[i[0] + 1][1], total_count)
+            item = mutual_informativity(step_2, i[1], text3[i[0] + 3][1], total_count)
             if(item not in pmi_list) & (item[0] != item[1]):
                 pmi_list.append(item)
         else:
@@ -191,7 +200,12 @@ def takeSecond(elem):
     #print(elem[2])
     return elem[2]
 
-def pmi_high(pmi_output):
+def pmi_high(pmi_output, n):
     cat = pmi_output
     cat.sort(key = takeSecond, reverse = True)
-    return cat
+    return cat[:n]
+
+def pmi_low(pmi_output, n):
+    cat = pmi_output
+    cat.sort(key = takeSecond, reverse = False)
+    return cat[:n]
