@@ -9,8 +9,8 @@ import collections
 from collections import Counter
 #nltk mutual informativity
 
-
-#PMI is defined as pmi(r,c)=log(P(r,c)/(P(r)*P(c))), with P(r,c) being the
+#note from fritz with // around my edit
+#PMI is defined as //pmi(r,c)=log(P(r,c)/(P(r)*P(c)))//, with P(r,c) being the
 #probability of co-occurrence and P(r) and P(c) the probability of
 #occurrence of two words (estimated via frequency)
 
