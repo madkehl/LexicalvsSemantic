@@ -142,4 +142,90 @@ def count(ci, word):
     offsets = ci.offsets(word)
 
     return len(offsets)
+from nltk import ConcordanceIndex
+import math
+def pmi(text):
+    text0 = text.lower()
+    text1 = text.split()
+    text1 = [i for i in text1 if i not in stop_words]
+    total_count = len(text1)
+    step_1 = make_nltktxt(text1)
+    step_2 = make_ci(step_1)
+    pmi_list = []
+    text2 = []
+    text2 = [i for i in text1 if i not in text2]
+    text3 = list(enumerate(text2))
+    index = 0
+    #realistically only words that at some point occur in a 3 word window are really worth looking at esp with these short texts
+    for i in text3:
+        if i[0] < (len(text3)-1):
+            #print(text2[i[0] + 1])
+            item = mutual_informativity(step_2, i[1], text3[i[0] + 1][1], total_count)
+            if(item not in pmi_list) & (item[0] != item[1]):
+                pmi_list.append(item)
+        if i[0] < (len(text3)-2):
+            #print(text2[i[0] + 1])
+            item = mutual_informativity(step_2, i[1], text3[i[0] + 2][1], total_count)
+            if(item not in pmi_list) & (item[0] != item[1]):
+                pmi_list.append(item)        
+        if i[0] < (len(text3)-3):
+            #print(text2[i[0] + 1])
+            item = mutual_informativity(step_2, i[1], text3[i[0] + 3][1], total_count)
+            if(item not in pmi_list) & (item[0] != item[1]):
+                pmi_list.append(item)
+        else:
+            return(pmi_list)
+#just to allow for sorting by actual pmi index
+def takeSecond(elem):
+    #print(elem[2])
+    return elem[2]
+def strOnly(elem):
+   # print(elem[0])
+    
+    return elem[0]
+
+def strOnly2(elem):
+   # print(elem[0][0])
+    
+    return elem[0][0]
+
+def pmi_clean(text):
+    n = pmi(text)
+    sort1 = []
+    for i in n:
+        y = i[:2]
+        y.sort(key = strOnly)
+        x = [y[0], y[1], i[2]]
+        sort1.append(x)
+    q = sort1
+    #print(q)
+    q.sort(key = strOnly2)
+   # print(q)
+    k = list(enumerate(q))
+    pmi_cl = []
+    dumb_check = []
+    for z in k:
+        n = [z[1][0], z[1][1]]
+        if ((z[0]) < (len(k) -1)) and (n not in dumb_check):
+            #if((z[1][0] == k[z[0] + 1][1][0]) and (z[1][1] == k[z[0] + 1][1][1])) or ((z[1][0] == k[z[0] + 1][1][1]) and (z[1][1] == k[z[0] + 1][1][0])):
+            dumb_check.append(n)
+            #pmi_cl.append(k[z[0] + 1][1])
+            #elif (z[1] not in pmi_cl) and (n not in dumb_check):
+             #   dumb_check.append(n)
+            #  pmi_cl.append(z[1])
+        #elif (z[1] not in pmi_cl) and (n not in dumb_check):
+         #   dumb_check.append(n)
+            pmi_cl.append(z[1])
+    return pmi_cl
+            
+
+def pmi_high(pmi_output, n):
+    cat = pmi_output
+    cat.sort(key = takeSecond, reverse = True)
+    return cat[:n]
+
+def pmi_low(pmi_output, n):
+    cat = pmi_output
+    cat.sort(key = takeSecond, reverse = False)
+    return cat[:n]
 
