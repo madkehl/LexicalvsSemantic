@@ -21,7 +21,7 @@ def latent_meaning(i):
         first_vec = first_vec - model3[i[0]]
         second_vec = second_vec - model3[i[1]]
         cos_sim = dot(first_vec, second_vec)/(norm(first_vec)*norm(second_vec))
-        print([i, item_dis, cos_sim])
+        return([i, item_dis, cos_sim])
 
 
         
