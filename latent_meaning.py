@@ -3,7 +3,11 @@ from gensim.models import Word2Vec
 from numpy import dot
 from numpy.linalg import norm
 
-model3 = Word2Vec.load('AAPECS.model')
+model = Word2Vec.load('AAPECS.model')
+
+import spacy
+nlp = spacy.load("en_core_web_md")
+
 
 def latent_meaning(i):
     if(i[0] in model3.wv.vocab) & (i[1] in model3.wv.vocab):

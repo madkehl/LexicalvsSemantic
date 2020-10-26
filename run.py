@@ -278,8 +278,11 @@ def pmi_low(pmi_output, n):
     cat.sort(key = takeSecond, reverse = False)
     return cat[:n]
 
-def generate_lexicals(input_value, n = 2000):
-    pmi_text = pmi(input_value)
+def generate_lexicals(input_value, n = 200):
+    if isinstance(input_value, str):
+        pmi_text = pmi(input_value)
+    else:
+        return('error')
     word_pairs = []
     item_dis = []
     latent_dis = []
@@ -301,7 +304,16 @@ def generate_lexicals(input_value, n = 2000):
     })
     latent_meanings['difference']= latent_meanings['item_dis'] - latent_meanings['latent_dis']
     lexicals = latent_meanings[(latent_meanings['difference'] > .05) & (latent_meanings['item_dis'] > 0.05)].sort_values(by = 'difference', ascending = False)
-    return( ''.join(list(lexicals['word_pairs'])))
+    lexicals_temp = [str(i) for i in lexicals['word_pairs']]
+    return( ''.join(lexicals_temp))
+
+
+progress_bar = html.Div(
+    [
+        dcc.Interval(id="progress-interval", n_intervals=0, interval=500),
+        dbc.Progress(id="progress_bar"),
+    ]
+)
 
 
 navbar = dbc.Navbar(
@@ -358,23 +370,26 @@ app.layout = html.Div(
         
         html.Button(id='submit-button', type='submit', children='Submit'),
         html.Div(id='output_div', children = [starter]),
+        html.Div(id = 'progress', children = [progress_bar]),
         html.Br(),
+      
         ],
     style={'marginBottom': 50, 'marginLeft': 25,'marginRight':25, 'marginTop': 25},
 )
 
 #this connects user interactions with backend code
 @app.callback(
-     Output("output_div", "children"),
-    [Input('text-div', 'value'),
-    Input('submit-button', 'n_clicks')],
+    [ Output("output_div", "children"),
+      Output("progress", "children"),],
+    [ Input('text-div', 'value'),
+      Input('submit-button', 'n_clicks'),
+      Input("progress-interval", "n_intervals")],
 )
 
-def update_output(clicks, input_value):
-    
+def update_output(clicks, input_value, progress_val):
+    progress = min(progress_val % 110, 100)
     if clicks is not None:
-        return(generate_lexicals(input_value))
-
+        return(generate_lexicals(input_value),f"{progress} %" if progress >= 5 else "")
 
 
 def main():
