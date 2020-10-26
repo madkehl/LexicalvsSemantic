@@ -45,8 +45,8 @@ stopwords = ['whom','hast','thou','therein', 'i', 'me', 'my', 'myself', 'we', 'o
 'than', 'too', 'very', 's', 't', 'can', 'will', 'just', 'don', 'should', 'now']
 
 test_doc = open("./test_doc.txt", "r", encoding = "utf-8")
-test_doc = test_doc.read()
-
+test_doc = str(test_doc.read())
+test_doc = 'cat dog'
 
 # external CSS stylesheets
 external_stylesheets = [
@@ -278,42 +278,42 @@ def pmi_low(pmi_output, n):
     cat.sort(key = takeSecond, reverse = False)
     return cat[:n]
 
-def generate_lexicals(input_value, n = 200):
+def generate_lexicals(input_value):
     if isinstance(input_value, str):
         pmi_text = pmi(input_value)
     else:
         return('error')
+
     word_pairs = []
     item_dis = []
     latent_dis = []
-    x = 0
-    for i in pmi_high(pmi_text, n):
-        if i != None:
-            j, k , l = latent_meaning_spacy([i[0], i[1]])
-            word_pairs.append(j)
-            item_dis.append(k)
-            latent_dis.append(l)
+
+    if pmi_text != None:
+        n = len(pmi_text)
+        for i in pmi_high(pmi_text, n):
+            if i != None:
+                j, k , l = latent_meaning_spacy([i[0], i[1]])
+                word_pairs.append(j)
+                item_dis.append(k)
+                latent_dis.append(l)
             #bar update
             
-    latent_meanings = pd.DataFrame({
+        latent_meanings = pd.DataFrame({
     
-    'word_pairs': word_pairs,
-    'item_dis': item_dis,
-    'latent_dis': latent_dis
+        'word_pairs': word_pairs,
+        'item_dis': item_dis,
+        'latent_dis': latent_dis
     
-    })
-    latent_meanings['difference']= latent_meanings['item_dis'] - latent_meanings['latent_dis']
-    lexicals = latent_meanings[(latent_meanings['difference'] > .05) & (latent_meanings['item_dis'] > 0.05)].sort_values(by = 'difference', ascending = False)
-    lexicals_temp = [str(i) for i in lexicals['word_pairs']]
-    return( ''.join(lexicals_temp))
-
-
-progress_bar = html.Div(
-    [
-        dcc.Interval(id="progress-interval", n_intervals=0, interval=500),
-        dbc.Progress(id="progress_bar"),
-    ]
-)
+        })
+        latent_meanings['difference']= latent_meanings['item_dis'] - latent_meanings['latent_dis']
+        lexicals = latent_meanings[(latent_meanings['difference'] > .05) & (latent_meanings['item_dis'] > 0.05)].sort_values(by = 'difference', ascending = False)
+        lexicals_temp = [str(i) for i in lexicals['word_pairs']]
+    else:
+        return('no text entered')
+    if len(lexicals_temp) > 0:
+        return( '_'.join(lexicals_temp))
+    else:
+        return('no relevant pairs in this selection')
 
 
 navbar = dbc.Navbar(
@@ -369,8 +369,8 @@ app.layout = html.Div(
         dcc.Input(id='text-div', value= test_doc, type='text'),
         
         html.Button(id='submit-button', type='submit', children='Submit'),
-        html.Div(id='output_div', children = [starter]),
-        html.Div(id = 'progress', children = [progress_bar]),
+        dcc.Loading(id = "loading-icon", 
+                children=[html.Div(id='output_div', children = [starter])], type="circle"), 
         html.Br(),
       
         ],
@@ -379,17 +379,14 @@ app.layout = html.Div(
 
 #this connects user interactions with backend code
 @app.callback(
-    [ Output("output_div", "children"),
-      Output("progress", "children"),],
-    [ Input('text-div', 'value'),
-      Input('submit-button', 'n_clicks'),
-      Input("progress-interval", "n_intervals")],
+     Output("output_div", "children"),
+    [ Input('submit-button', 'n_clicks'),
+      Input('text-div', 'value'),],
 )
 
-def update_output(clicks, input_value, progress_val):
-    progress = min(progress_val % 110, 100)
+def update_output(clicks, input_value):
     if clicks is not None:
-        return(generate_lexicals(input_value),f"{progress} %" if progress >= 5 else "")
+        return(generate_lexicals(input_value))
 
 
 def main():
