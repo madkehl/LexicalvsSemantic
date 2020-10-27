@@ -12,6 +12,7 @@ import numpy as np
 from sklearn.preprocessing import StandardScaler
 import math
 
+
 import collections
 from collections import Counter
 
@@ -409,6 +410,10 @@ app.layout = html.Div(
         html.Br(),
         html.Button(id='submit-button', type='submit', children='Submit'),
         html.Br(),
+        dcc.Interval(id="interval", interval=500),
+        dbc.Collapse(
+            dbc.Progress(id="progress", className="mb-3"), id="collapse"
+        ),
       
         ],
     style={'marginBottom': 50, 'marginLeft': 25,'marginRight':25, 'marginTop': 25},
@@ -416,7 +421,7 @@ app.layout = html.Div(
 
 #this connects user interactions with backend code
 @app.callback(
-     Output("output_div", "children"),
+      Output("output_div", "children"),
     [ Input('submit-button', 'n_clicks'),
       Input('text-div', 'value'),],
 )
@@ -430,6 +435,7 @@ def update_output(clicks, input_value):
         if prop_id == "submit-button":
     #if clicks is not None:
             return(generate_lexicals(input_value))
+
 
 
 def main():
