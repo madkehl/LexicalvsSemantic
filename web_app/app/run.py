@@ -6,7 +6,6 @@ import dash_core_components as dcc
 import dash_html_components as html
 from dash.dependencies import Input, Output, ClientsideFunction, State
 import dash_bootstrap_components as dbc
-import base64
 import sys
 import numpy as np
 from sklearn.preprocessing import StandardScaler
@@ -28,8 +27,6 @@ from string import punctuation
 from re import sub
 punctuation = punctuation +'”'+'“'+'’' + '—' + '’' + '‘' +'0123456789'
 
-import plotly.graph_objects as go
-from plotly.subplots import make_subplots
 import os
 
 stopwords = ['whom','hast','thou','therein', 'i', 'me', 'my', 'myself', 'we', 'our', 'ours', 'ourselves', 'you', 'your', 'yours',
