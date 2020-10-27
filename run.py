@@ -367,10 +367,10 @@ app.layout = html.Div(
         # Left column
         html.Div(id="left-column", className="four columns", children=[description_card()]),
         dcc.Input(id='text-div', value= test_doc, type='text'),
+        dcc.Loading(id = "loading-icon", 
+                children=[html.Div(id='output_div', children = [starter])], type="circle"),
         
         html.Button(id='submit-button', type='submit', children='Submit'),
-        dcc.Loading(id = "loading-icon", 
-                children=[html.Div(id='output_div', children = [starter])], type="circle"), 
         html.Br(),
       
         ],
@@ -385,8 +385,14 @@ app.layout = html.Div(
 )
 
 def update_output(clicks, input_value):
-    if clicks is not None:
-        return(generate_lexicals(input_value))
+
+    ctx = dash.callback_context
+    
+    if ctx.triggered:
+        prop_id = ctx.triggered[0]["prop_id"].split(".")[0]
+        if prop_id == "submit-button":
+    #if clicks is not None:
+            return(generate_lexicals(input_value))
 
 
 def main():
