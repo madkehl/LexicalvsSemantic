@@ -98,37 +98,6 @@ def latent_meaning_spacy(i, top_ = 10):
     else:
         return([None, None, None])
 
-def make_ci(komyagin):
-    txt = (nltk.Text(komyagin))
-    return(ConcordanceIndex(txt))
-
-#for some reason having difficulty subsetting by tokens instead of characters:: instead just use enough 
-#characters to later be able to reliably get a 5 word radius
-
-def get_context(ci, word, width=150, lines=100):
-    
-    half_width =  (width - len(word) - 2) // 2
-    context = width // 4 # approx number of words of context
-    num = 5
-    results = []
-    offsets = ci.offsets(word)
-    
-    if offsets:
-        for i in offsets:
-            query_word = ci._tokens[i]
-  
-            left_context = ci._tokens[max(0, i - context) : i]
-            right_context = ci._tokens[i + 1 : i + context]
-           
-            left_print = " ".join(left_context)[-half_width:]
-            right_print = " ".join(right_context)[:half_width]
-                
-            full_line_print = " ".join([left_print, query_word, right_print])
-            
-            results.append(full_line_print)
-            
-    return ([num, results])
-
 def clean_text(txt_ls):
     
     translator = str.maketrans('','', sub('\#', '', punctuation))
@@ -146,168 +115,31 @@ def clean_text(txt_ls):
         clean_txt_ls.append(str_[1:])
         
     return(clean_txt_ls)
-
-def clean_context(ci, target_word1, target_word2, window = 5):
-    tox = []
-    #gets context around a target word
-    word_one_context = get_context(ci, target_word1)
-   
-     #takes this context and reshapes it into a -5 to + 5 window
-    for i in word_one_context[1]:
-        split_i = i.split()
-        for z in split_i:
-            tox.append(z)
-            
-    to_mend = list(enumerate(tox))
-    
-    mended_tox = []
-    #modifications necessary to account for words at the start and end of corpus
-    for z in to_mend:
-        if z[1] == target_word1:
-            if z[0] < (window):
-                padded = tox[0:(z[0]+window)]
-                mended_tox.append(padded)
-            elif z[0] > (len(tox) - 1):
-                padded = tox[(z[0] -window):(len(tox)-1)]
-                mended_tox.append(padded)
-            else: 
-                padded = tox[(z[0] -window):(z[0] + window)]
-                mended_tox.append(padded)
-#reshaping list into format that can be more quickly processed    
-    final_tox = []
-    for i in mended_tox:
-        for n in i:
-            final_tox.append(n)
-    return(final_tox)
-
-#gathers all contexts of the word in results
-def mutual_informativity(ci, target_word1, target_word2, total_count, window = 10):
-   
-    final_tox =  clean_context(ci, target_word1, target_word2, window = 10)
-    
-#this will return the count of target_word2 in the vicinity of target_word1
-    prob_numx = Counter(final_tox)
-    prob_num = prob_numx[target_word2]
-    P_rc = prob_num/total_count
-    P_r = (count(ci, target_word1))/total_count
-    P_c = (count(ci, target_word2))/total_count
- #checking for indexing errors and overlap errors.
-#fix to overlap is a bit of a hack fix, most notable problems are double counting 
-#so if number of cooccurances is greater than number of times a word appears in 
-#a document, then it replaces cooccurance with the total number of times
-#except in the case that this is an odd number (since it's not being double-counted then,
-#it's being double counted once and has another appearance)
-#odd numbers, is P_c - 1/total. 
-#this still may cause some errors
-    if P_rc == 0:
-     #   print(prob_numx)
-        return ([target_word1, target_word2, "ERROR"])
-    elif P_rc > P_c:
-     #   print(target_word2)
-        rounded = int(P_rc/P_c)
-        nr = P_rc/P_c
-        if (rounded > nr):
-            P_n = P_c - 1/total_count
-        else:
-            P_n = P_c
-        mutinf = math.log10(P_n/(P_r*P_c))
-        #print([P_rc, P_c, P_r, P_n])
-    elif P_rc > P_r:
-        rounded = int(P_rc/P_r)
-        nr = P_rc/P_r
-        if (rounded > nr):
-            P_n = P_c -1/total_count
-        else:
-            P_n = P_c
-        mutinf = math.log10(P_n/(P_r*P_c))
-        #print([P_rc, P_c, P_r, P_n])
-    else:
-        mutinf = math.log10(P_rc/(P_r*P_c))
-    return ([target_word1, target_word2, mutinf])
-
-def count(ci, word):
-   
-    offsets = ci.offsets(word)
-
-    return len(offsets)
-
-def pmi(text):
-    '''
-    iterates through and finds shit
-    '''
-    
-    clean_doc = clean_text(text.split())
-    total_count = len(clean_doc)
-    
-    test_ci = make_ci(clean_doc)
-    
-    pmi_list = []
-    ordered_set_hold = []
-    ordered_set = [i for i in clean_doc if i not in ordered_set_hold and len(i) > 0]
-
-    
-    index = 0
-    #realistically only words that at some point occur in a 3 word window are really worth looking at esp with these short texts
-    for i in enumerate(ordered_set):
-        if i[0] < (len((ordered_set))-1):
-            item = mutual_informativity(test_ci, i[1], ordered_set[i[0] + 1], total_count)
-            if(item not in pmi_list) & (item[0] != item[1]):
-                pmi_list.append(item)
-        if i[0] < (len(ordered_set)-2):
-            item = mutual_informativity(test_ci, i[1], ordered_set[i[0] + 2], total_count)
-            if(item not in pmi_list) & (item[0] != item[1]):
-                pmi_list.append(item)        
-        if i[0] < (len(ordered_set)-3):
-            item = mutual_informativity(test_ci, i[1], ordered_set[i[0] + 3], total_count)
-            if(item not in pmi_list) & (item[0] != item[1]):
-                pmi_list.append(item)
-        else:
-            return(pmi_list)
         
 #just to allow for sorting by actual pmi index
-def takeSecond(elem):
-    #print(elem[2])
-    return elem[2]
-
-def pmi_high(pmi_output, n):
-    cat = pmi_output
-    cat.sort(key = takeSecond, reverse = True)
-    return cat[:n]
-
-def pmi_low(pmi_output, n):
-    cat = pmi_output
-    cat.sort(key = takeSecond, reverse = False)
-    return cat[:n]
-
 def pair_words(text):
     '''
     iterates through and finds shit
     '''
     
     clean_doc = clean_text(text.split())
-    total_count = len(clean_doc)
-    
-    test_ci = make_ci(clean_doc)
     
     words_pairs = []
-    ordered_set_hold = []
-    ordered_set = [i for i in clean_doc if i not in ordered_set_hold and len(i) > 0]
 
-    
     index = 0
     #realistically only words that at some point occur in a 3 word window are really worth looking at esp with these short texts
-    for i in enumerate(ordered_set):
-        if i[0] < (len((ordered_set))-1):
-            item = (i[1], ordered_set[i[0] + 1])
-            if(item not in words_pairs) & (item[0] != item[1]):
+    for i in enumerate(clean_doc):
+        if i[0] < (len((clean_doc))-1):
+            item = (i[1], clean_doc[i[0] + 1])
+            if(item not in words_pairs) & ((clean_doc[i[0] + 1], i[1]) not in word_pairs) & (item[0] != item[1]):
                 words_pairs.append(item)
-        if i[0] < (len(ordered_set)-2):
-            item =  (i[1], ordered_set[i[0] + 2])
-            if(item not in words_pairs) & (item[0] != item[1]):
+        if i[0] < (len(clean_doc)-2):
+            item =  (i[1], clean_doc[i[0] + 2])
+            if(item not in words_pairs) & ((clean_doc[i[0] + 2], i[1]) not in word_pairs) & (item[0] != item[1]):
                 words_pairs.append(item)        
-        if i[0] < (len(ordered_set)-3):
+        if i[0] < (len(clean_doc)-3):
             item =  (i[1], ordered_set[i[0] + 3])
-            if(item not in words_pairs) & (item[0] != item[1]):
+            if(item not in words_pairs) & ((clean_doc[i[0] + 3], i[1]) not in word_pairs) & (item[0] != item[1]):
                 words_pairs.append(item)
         else:
             return(words_pairs)
@@ -334,18 +166,30 @@ def generate_lexicals(input_value):
             
         latent_meanings = pd.DataFrame({
     
-        'word_pairs': word_pairs,
-        'item_dis': item_dis,
-        'latent_dis': latent_dis
+            'word_pairs': word_pairs,
+            'item_dis': item_dis,
+            'latent_dis': latent_dis
     
         })
         latent_meanings['difference']= latent_meanings['item_dis'] - latent_meanings['latent_dis']
-        lexicals = latent_meanings[(latent_meanings['difference'] > .05) & (latent_meanings['item_dis'] > 0.05)].sort_values(by = 'difference', ascending = False)
+        lexicals = latent_meanings[(latent_meanings['difference'] > 0) & (latent_meanings['item_dis'] > 0)].sort_values(by = 'difference', ascending = False)
         lexicals_temp = [str(i) for i in lexicals['word_pairs']]
     else:
         return('no text entered')
     if len(lexicals_temp) > 0:
-        return( '_'.join(lexicals_temp))
+        fig = go.Figure(data=[go.Table(
+                header=dict(values=list(lexicals.columns),
+                    fill_color='paleturquoise',
+                    align='left'),
+                cells=dict(values=[lexicals.word_pairs, lexicals.item_dis, lexicals.latent_dis, lexicals.difference],
+                   fill_color='lavender',
+                   align='left'))
+            ])
+
+
+
+        
+        return(dcc.Graph(figure=fig))
     else:
         return('no relevant pairs in this selection')
 
@@ -379,7 +223,7 @@ def description_card():
             html.Br(),
             html.H3("Lexically related words"),
             html.Br(),
-            html.A('This web app is designed to be a clean and simple way of visualizing the results of a rather complex analysis. The goal of this was to understand what offers would be most impactful for which demographics.  Information such as age, income, gender and years member was available for analysis as well as offers and their various characteristics.  More behind-the-scenes data cleaning and analysis, as well as other intermediary discussion is available in the Github for the project and the Jupyter notebook rendering.'),
+            html.A('The code driving this web app.'),
             html.A("If you love this, please visit the full project either by clicking my name above (my Github) or viewing the full notebook here.", href = 'https://nbviewer.jupyter.org/github/madkehl/Starbucks/blob/main/web_app/models/Starbucks_full_documentation.ipynb'),
             html.Div(
                 id="intro",
@@ -406,14 +250,10 @@ app.layout = html.Div(
         dcc.Input(id='text-div', value= test_doc, type='text'),
         html.Br(),
         dcc.Loading(id = "loading-icon", 
-                children=[html.Div(id='output_div', children = [starter])], type="circle"),
+                children=[html.Div(id='output_div', children = [starter])], type="graph"),
         html.Br(),
         html.Button(id='submit-button', type='submit', children='Submit'),
-        html.Br(),
-        dcc.Interval(id="interval", interval=500),
-        dbc.Collapse(
-            dbc.Progress(id="progress", className="mb-3"), id="collapse"
-        ),
+        html.Br()
       
         ],
     style={'marginBottom': 50, 'marginLeft': 25,'marginRight':25, 'marginTop': 25},
