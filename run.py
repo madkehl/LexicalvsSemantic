@@ -64,8 +64,13 @@ app.config.suppress_callback_exceptions = True
 def most_similar(word, topn=10):
     #https://stackoverflow.com/questions/57697374/list-most-similar-words-in-spacy-in-pretrained-model
     ms = nlp.vocab.vectors.most_similar(nlp(word).vector.reshape(1,nlp(word).vector.shape[0]), n=topn)
-    words = [nlp.vocab.strings[w] for w in ms[0][0]]
-    distances = ms[2]
+    ms = list(zip(ms[0][0], ms[1][0], ms[2][0]))
+    print(ms)
+    ms = [i for i in ms if str(nlp.vocab.strings[i[0]]).lower() != word]
+    ms = [i for i in ms if str(nlp.vocab.strings[i[0]]).lower() + 's' != word]
+    ms = [i for i in ms if str(nlp.vocab.strings[i[0]]).lower() + 'es' != word]
+    words = [nlp.vocab.strings[w[0]] for w in ms]
+    distances = [i[2] for i in ms]
     return words, distances
 
 
@@ -131,15 +136,15 @@ def pair_words(text):
     for i in enumerate(clean_doc):
         if i[0] < (len((clean_doc))-1):
             item = (i[1], clean_doc[i[0] + 1])
-            if(item not in words_pairs) & ((clean_doc[i[0] + 1], i[1]) not in word_pairs) & (item[0] != item[1]):
+            if(item not in words_pairs) & ((clean_doc[i[0] + 1], i[1]) not in words_pairs) & (item[0] != item[1]):
                 words_pairs.append(item)
         if i[0] < (len(clean_doc)-2):
             item =  (i[1], clean_doc[i[0] + 2])
-            if(item not in words_pairs) & ((clean_doc[i[0] + 2], i[1]) not in word_pairs) & (item[0] != item[1]):
+            if(item not in words_pairs) & ((clean_doc[i[0] + 2], i[1]) not in words_pairs) & (item[0] != item[1]):
                 words_pairs.append(item)        
         if i[0] < (len(clean_doc)-3):
-            item =  (i[1], ordered_set[i[0] + 3])
-            if(item not in words_pairs) & ((clean_doc[i[0] + 3], i[1]) not in word_pairs) & (item[0] != item[1]):
+            item =  (i[1], clean_doc[i[0] + 3])
+            if(item not in words_pairs) & ((clean_doc[i[0] + 3], i[1]) not in words_pairs) & (item[0] != item[1]):
                 words_pairs.append(item)
         else:
             return(words_pairs)
@@ -223,15 +228,16 @@ def description_card():
             html.Br(),
             html.H3("Lexically related words"),
             html.Br(),
-            html.A('The code driving this web app.'),
+            html.A('The code driving this web app was originally developed to assist in the development of experimental items in studies related to aphasia.  The goal is to determine a subset of words that are likely to be lexically related, instead of just semantically.  The way our algorithm does this is by following the infographic below.  Please note that this process is not the most efficient and texts of more than a few hundred words, will take an increasingly long time to run.'),
             html.A("If you love this, please visit the full project either by clicking my name above (my Github) or viewing the full notebook here.", href = 'https://nbviewer.jupyter.org/github/madkehl/Starbucks/blob/main/web_app/models/Starbucks_full_documentation.ipynb'),
             html.Div(
                 id="intro",
                 children=[
                     html.Br(),
-                    html.A("This interactive graph allows you to examine recommendations by demographic.  Double click labels in the legend to view demographics of interest, and use the offer selection bar to filter by offer types."),
+                    html.A("Please enter text of interest here.  While the code is running, a loading graph icon will appear.  Don't worry if it is taking a long time, as long as the graph is moving, it's working."),
                     html.Br(),
-                    html.A('If no offers exist that meet all the criteria selected, then you will simply see all results.'),
+                    html.A('It will then display the words from your selection that are most likely to be a lexical pairing, rather than a semantic one. If none exist, it will print a corresponding statement.  To use again, please just refresh the page.'),
+                    html.Br(),
                 ],
             ),
         ],
