@@ -278,9 +278,42 @@ def pmi_low(pmi_output, n):
     cat.sort(key = takeSecond, reverse = False)
     return cat[:n]
 
+def pair_words(text):
+    '''
+    iterates through and finds shit
+    '''
+    
+    clean_doc = clean_text(text.split())
+    total_count = len(clean_doc)
+    
+    test_ci = make_ci(clean_doc)
+    
+    words_pairs = []
+    ordered_set_hold = []
+    ordered_set = [i for i in clean_doc if i not in ordered_set_hold and len(i) > 0]
+
+    
+    index = 0
+    #realistically only words that at some point occur in a 3 word window are really worth looking at esp with these short texts
+    for i in enumerate(ordered_set):
+        if i[0] < (len((ordered_set))-1):
+            item = (i[1], ordered_set[i[0] + 1])
+            if(item not in words_pairs) & (item[0] != item[1]):
+                words_pairs.append(item)
+        if i[0] < (len(ordered_set)-2):
+            item =  (i[1], ordered_set[i[0] + 2])
+            if(item not in words_pairs) & (item[0] != item[1]):
+                words_pairs.append(item)        
+        if i[0] < (len(ordered_set)-3):
+            item =  (i[1], ordered_set[i[0] + 3])
+            if(item not in words_pairs) & (item[0] != item[1]):
+                words_pairs.append(item)
+        else:
+            return(words_pairs)
+
 def generate_lexicals(input_value):
     if isinstance(input_value, str):
-        pmi_text = pmi(input_value)
+        pmi_text = pair_words(input_value)
     else:
         return('error')
 
@@ -290,7 +323,7 @@ def generate_lexicals(input_value):
 
     if pmi_text != None:
         n = len(pmi_text)
-        for i in pmi_high(pmi_text, n):
+        for i in (pmi_text):
             if i != None:
                 j, k , l = latent_meaning_spacy([i[0], i[1]])
                 word_pairs.append(j)
@@ -332,6 +365,8 @@ navbar = dbc.Navbar(
         dbc.NavbarToggler(id="navbar-toggler"),
     ],)
 
+
+
 def description_card():
     """
     OUTPUT: A Div containing dashboard title & descriptions.
@@ -341,7 +376,7 @@ def description_card():
         children=[
             html.H5(""),
             html.Br(),
-            html.H3("Recommendations based on collaborative filtering techniques, Starbucks Data"),
+            html.H3("Lexically related words"),
             html.Br(),
             html.A('This web app is designed to be a clean and simple way of visualizing the results of a rather complex analysis. The goal of this was to understand what offers would be most impactful for which demographics.  Information such as age, income, gender and years member was available for analysis as well as offers and their various characteristics.  More behind-the-scenes data cleaning and analysis, as well as other intermediary discussion is available in the Github for the project and the Jupyter notebook rendering.'),
             html.A("If you love this, please visit the full project either by clicking my name above (my Github) or viewing the full notebook here.", href = 'https://nbviewer.jupyter.org/github/madkehl/Starbucks/blob/main/web_app/models/Starbucks_full_documentation.ipynb'),
@@ -358,18 +393,20 @@ def description_card():
     )
 
 
+
 starter = generate_lexicals(test_doc)
 #app structure
 
 app.layout = html.Div(
     id="app-container",
     children=[
-        # Left column
+        html.Div(id="nav", children = [navbar]),
         html.Div(id="left-column", className="four columns", children=[description_card()]),
         dcc.Input(id='text-div', value= test_doc, type='text'),
+        html.Br(),
         dcc.Loading(id = "loading-icon", 
                 children=[html.Div(id='output_div', children = [starter])], type="circle"),
-        
+        html.Br(),
         html.Button(id='submit-button', type='submit', children='Submit'),
         html.Br(),
       
