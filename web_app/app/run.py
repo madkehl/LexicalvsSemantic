@@ -8,15 +8,7 @@ from dash.dependencies import Input, Output, ClientsideFunction, State
 import dash_bootstrap_components as dbc
 import sys
 import numpy as np
-from sklearn.preprocessing import StandardScaler
 import math
-
-
-import collections
-from collections import Counter
-
-import nltk
-from nltk import ConcordanceIndex
 
 import spacy
 nlp = spacy.load("en_core_web_md")
