@@ -52,7 +52,7 @@ def most_similar(word, topn=10):
     #https://stackoverflow.com/questions/57697374/list-most-similar-words-in-spacy-in-pretrained-model
     ms = nlp.vocab.vectors.most_similar(nlp(word).vector.reshape(1,nlp(word).vector.shape[0]), n=topn)
     ms = list(zip(ms[0][0], ms[1][0], ms[2][0]))
-    print(ms)
+  #  print(ms)
     ms = [i for i in ms if str(nlp.vocab.strings[i[0]]).lower() != word]
     ms = [i for i in ms if str(nlp.vocab.strings[i[0]]).lower() + 's' != word]
     ms = [i for i in ms if str(nlp.vocab.strings[i[0]]).lower() + 'es' != word]
