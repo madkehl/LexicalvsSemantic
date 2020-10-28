@@ -13,7 +13,7 @@ import math
 import spacy
 
 lang = 'en'
-pipeline = ['tagger', 'parser', 'ner']
+pipeline = ['ner']
 
 nlp = spacy.blank(lang)
 for pipe_name in pipeline:
