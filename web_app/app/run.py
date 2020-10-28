@@ -12,11 +12,19 @@ import math
 
 import spacy
 
+lang = 'en'
+pipeline = ['ner']
 
-nlp = spacy.load("en_core_web_md", disable = ['tagger', 'parser'])
+nlp = spacy.blank(lang)
+for pipe_name in pipeline:
+    pipe = nlp.create_pipe(pipe_name)
+    nlp.add_pipe(pipe)
+nlp.from_disk('../test code/reduced_model')
 
 vocab = nlp.vocab.strings
 
+import plotly
+import plotly.graph_objects as go
 
 from string import punctuation
 from re import sub
@@ -167,7 +175,7 @@ def generate_lexicals(input_value):
     
         })
         latent_meanings['difference']= latent_meanings['item_dis'] - latent_meanings['latent_dis']
-        lexicals = latent_meanings[(latent_meanings['difference'] > 0) & (latent_meanings['item_dis'] > 0)].sort_values(by = 'difference', ascending = False)
+        lexicals = latent_meanings[(latent_meanings['difference'] > 0.01) & (latent_meanings['item_dis'] > 0)].sort_values(by = 'difference', ascending = False)
         lexicals_temp = [str(i) for i in lexicals['word_pairs']]
     else:
         return('no text entered')
