@@ -1,17 +1,14 @@
-# Starbucks recommendation project
+# Lexical similarity code
 
 The following code attempts to take information about different customers and their offer use habits to provide suggestions on what types of offers certain types of customers are most likely to respond to.
 
 In order to do this we first asses what types of users are most likely to be impacted and then look at overall, what biases exist towards what types of demographic groups, and what the most impactful offers to offer may be.  This project consists of a web app, and a jupyter notebook, as well as this readme.  Methods and technical details and discussion are available in the notebook, while this file is intended as an overview/results summary, and the web app is a visualization of final results.
 
 ### Instructions:
-[app hosted in Heroku](https://afternoon-gorge-22266.herokuapp.com/)
 
-or
+1. The folder test code is just a draft essentially
 
-1. The code code to clean and model the data used is hosted in a Jupyter notebook instead of a series of scripts.  This is partially because the notebook provides a sort of 'appendix' to the app, which is rather simple.
-
-2. Run the following command in the app's directory to run your web app.  Since this is a Dash app I believe that the normal port used is 8080 for local machines. By default the app is set to run smoothly with heroku, port 5000
+2. Run the following command in the app's directory to run your web app.  Since this is a Dash app I believe that the normal port used is 8080 for local machines.
     `python run.py 8080`
 
 3. Go to http://0.0.0.0:8080/ or localhost:8080, depending on your computer
