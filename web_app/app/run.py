@@ -11,9 +11,9 @@ import numpy as np
 import math
 
 import spacy
-nlp = spacy.load("en_core_web_md")
-n_vectors = 5000  # number of vectors to keep
-removed_words = nlp.vocab.prune_vectors(n_vectors)
+
+
+nlp = spacy.load("en_core_web_md", disable = ['tagger', 'parser'])
 
 vocab = nlp.vocab.strings
 
