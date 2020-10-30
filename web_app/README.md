@@ -1,17 +1,14 @@
-# Starbucks recommendation project
+# Lexical similarity code
 
-The following code attempts to take information about different customers and their offer use habits to provide suggestions on what types of offers certain types of customers are most likely to respond to.
+This code was developed in order to create items for an aphasia study.  Aphasia is a condition often preceded by a stroke or some other type of head trauma that impairs either a person's ability to retrieve words, or a person's ability to process meaning, or some combination. While historically aphasia has been split into Wernicke and Broca's aphasia the truth of the condition is that it is much more muddled, with most aphasia patients not fully representing the archetype of either of these pathologies.
 
-In order to do this we first asses what types of users are most likely to be impacted and then look at overall, what biases exist towards what types of demographic groups, and what the most impactful offers to offer may be.  This project consists of a web app, and a jupyter notebook, as well as this readme.  Methods and technical details and discussion are available in the notebook, while this file is intended as an overview/results summary, and the web app is a visualization of final results.
+One research challenge that has hovered over this area of research is attempting to separate semantic knowledge from lexical knowledge, semantic knowledge being closer to ground truth and the reality of things, and lexical knowledge being more oriented towards sometimes figurative, more language based word relationships.  This is clinically important as in aphasia rehabilitation settings it could be possible to train patients to use semantic knowledge that they still have access to to inform lexical knowledge etc, because of how we know these types of knowledge to be distributed throughout the brain.
 
 ### Instructions:
-[app hosted in Heroku](https://afternoon-gorge-22266.herokuapp.com/)
 
-or
+1. The folder test code is just a draft essentially.  There are some old scripts related to pmi, and just mutual informativity that were relevant at the start of this project, however, the word vectors we've borrowed from spacy eclipse the need for hand calculated mutual informativity.  I used borrowed word vectors because there was no "corpus" to begin with.  
 
-1. The code code to clean and model the data used is hosted in a Jupyter notebook instead of a series of scripts.  This is partially because the notebook provides a sort of 'appendix' to the app, which is rather simple.
-
-2. Run the following command in the app's directory to run your web app.  Since this is a Dash app I believe that the normal port used is 8080 for local machines. By default the app is set to run smoothly with heroku, port 5000
+2. Run the following command in the app's directory to run your web app.  Since this is a Dash app I believe that the normal port used is 8080 for local machines.
     `python run.py 8080`
 
 3. Go to http://0.0.0.0:8080/ or localhost:8080, depending on your computer
@@ -21,46 +18,50 @@ or
 # Folders and files included:
 
 * **app**:
-	* **run.py**:  This will use several exports from the Starbucks_full_documentation.ipynb to create a visualization of the final results from that notebook.  
-	* **df_combo_format.png**, **diff_df_exp_styler.png**, **diff_df_styler.png**:  These are images of pd.style object created in Starbucks_full_documentation.   They are imported as images because the style objects can't be rendered in Dash, and these are available in their full format in the .ipynb.
-* **data**:  
-	* **offer_info.csv**: This file contains a matrix linking offer_ids to their prominent characteristics
-	* **portfolio.json**:  contains offer information, reward amount, duration and difficulty (from Udacity Data Science Nanodegree)
-	* **profile.json**: contains person information (from UDSN) 
-	* **transcript.json**: contains information on transactions, time.
-  
-* **models**: 
-	* **Starbucks_full_documentation.ipynb**: This file contains code to clean the data, do initial regression models, and then implement FunkSVD and chi-square
-	* **diff_df_exp_sc.csv**, **diff_df_sc.csv**: This contains the difference between observed and expected values for user item matrices, grouped by demographic categories, in a matrix format.  Each file is for a different type of FunkSVD.
-	* **output_funksvd.csv**, **output_funksvd.csv**, these contain the u + v matrix stacked upon each other 
+	* **run.py**:  This will launche the web app
+* **test code**: 
+	* **reduced_model**: This folder is supposed to be an import/export of spacy en_core_web_md with pruned vectors.  In all honesty, I'm not sure how well it worked.  On my local machine I am able to use it to run the app easily, but the build currently fails with an msgpack extra values error when writing from bytes in heroku.  I have yet to test this in a virtual environment, which may be part of the problem.  However, if you have the skills to run this locally, you can also just load the normal spacy models (md or lg because of the vector functions used) instead of this import.
+	* **FigureofSpeechPrediction.ipynb**, **latent_meaning.py**, **mutual_informativity.py**: These contain the scripts from various stages of development.  It is simple enough to just be included in the run file, although it could be read in from these.
+	* **test_doc***, quotes from Moby Dick, just used to test code. 
 
 # Current Requirements:
+chardet==3.0.4
+click==6.7
 dash==1.16.3
 dash-bootstrap-components==0.10.7
 dash-core-components==1.12.1
 dash-html-components==1.1.1
 scikit-learn==0.22.2
 pandas==1.1.2
+idna==2.6
+importlib-metadata==1.4.0
+itsdangerous==0.24
+msgpack==0.5.4
+msgpack-numpy==0.4.1
+msgpack-python==0.5.1
 numpy==1.18.1
+nltk==3.2.5
+plac==0.9.6
 plotly==4.11.0
-statsmodels==0.8.0
-seaborn==0.8.1
-matplotlib==2.1.2
-jsonschema==2.6.0
 gunicorn==19.10.0
+pytz==2017.3
+python-dateutil==2.8.1
+requests==2.23.0
+six==1.14.0
 scipy==1.3.2
+spacy==2.2.3
+srsly==1.0.1
+thinc==7.3.1
+tqdm==4.42.1
+urllib3==1.22
+wasabi==0.6.0
+zipp==2.0.1
 
 # Results:
   
-Unique combinations were found associated with each demographic group. Discounts were more effective with people who were younger, lower income, and/or male.  Older, higher income people were overrepresented in bogo orders.
+Computational metric of evaluation in the works.  However Native english speakers will recognize that if provided with sufficient text, probable lexical relations are extracted, although there are some errors.
 
 # Notes:
-
-There were several complexities of this analysis worth discussing (some are further elaborated in the notebook).  First of all, there was the challenge of determining offer impact, for which we used the ratio of reward used to money spent. Additionally, we made no attempt to account for all the possible interaction effects generated by this demographic data which is a major weakness of this analysis. If one specific population of interest it would be worth putting these to more rigorous statistical analyses. Finally, we were unable to find a suitable configuration of the standard FunkSVD algorithm that was able to perform well against a test set.  For this reason we include two iterations of the algorithm, one optimized with a test set but a high MSE (~ 300), and one that is likely overfit.  We place greater confidence in results shared by these two iterations.
-
-# Discussion:
-
-Our application of a chi sq emphasizes differences in population and allowed us to produce unique profiles for each demographic group of interest, except gender otherwise specified, which had very small effect sizes (perhaps because of being underrepresented). We found that women were the demographic group most likely to be impacted by discounts and small rewards, while men were most likely to use high rewards that last a long time and have high difficulty (although this may be related to high difficulty rewards are likely to have higher value).  The age range 25 to 40 and being in income group 2 or 3 (making > 40k a year) were most likely to be impacted by bogo rewards. Income group 3 (> 75k) was most likely to be impacted by mobile rewards of mid difficulty (in addition to bogo). 
 
 
 
@@ -70,9 +71,8 @@ Madeline Kehl (mad.kehl@gmail.com)
 
 # Acknowledgements:
 
-* Udacity Data Science Nanodegree
-* Starbucks
-
+* LRDC, University of Pittsburgh
+* Dr. Tessa Warren, Haley Dresang
 
 # MIT License
 

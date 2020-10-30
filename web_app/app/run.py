@@ -9,17 +9,17 @@ import dash_bootstrap_components as dbc
 import sys
 import numpy as np
 import math
-
+import pickle
 import spacy
 
 lang = 'en'
-pipeline = ['ner']
-
+pipeline = ['tagger', 'parser', 'ner']
 nlp = spacy.blank(lang)
 for pipe_name in pipeline:
     pipe = nlp.create_pipe(pipe_name)
     nlp.add_pipe(pipe)
 nlp.from_disk('../test code/reduced_model')
+
 
 vocab = nlp.vocab.strings
 
