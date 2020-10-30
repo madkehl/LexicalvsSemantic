@@ -6,7 +6,11 @@ One research challenge that has hovered over this area of research is attempting
 
 ### Instructions:
 
+<<<<<<< HEAD
 1. The folder test code is just a draft essentially.  There are some old scripts related to pmi, and just mutual informativity that were relevant at the start of this project, however, the word vectors we've borrowed from spacy eclipse the need for hand calculated mutual informativity.  I used borrowed word vectors because there was no "corpus" to begin with.  
+=======
+1. The folder test code is just a draft essentially
+>>>>>>> a6cd60949894a039b10406f006b1b41c9b50bc07
 
 2. Run the following command in the app's directory to run your web app.  Since this is a Dash app I believe that the normal port used is 8080 for local machines.
     `python run.py 8080`
