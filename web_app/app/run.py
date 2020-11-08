@@ -12,22 +12,25 @@ import math
 import pickle
 import spacy
 
-lang = 'en'
-pipeline = ['ner']
-nlp = spacy.blank(lang)
-for pipe_name in pipeline:
-    pipe = nlp.create_pipe(pipe_name)
-    nlp.add_pipe(pipe)
-nlp.from_disk('../test code/reduced_model')
-
-
-vocab = nlp.vocab.strings
-
 import plotly
 import plotly.graph_objects as go
 
 from string import punctuation
 from re import sub
+
+nlp = spacy.load('en_core_web_md')
+'''lang = 'en'
+pipeline = ['ner']
+nlp = spacy.blank(lang)
+for pipe_name in pipeline:
+    pipe = nlp.create_pipe(pipe_name)
+    nlp.add_pipe(pipe)
+    
+nlp.from_disk('../test code/reduced_model')'''
+
+
+vocab = nlp.vocab.strings
+
 punctuation = punctuation +'”'+'“'+'’' + '—' + '’' + '‘' +'0123456789'
 
 import os

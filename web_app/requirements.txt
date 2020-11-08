@@ -29,3 +29,4 @@ tqdm==4.42.1
 urllib3==1.22
 wasabi==0.6.0
 zipp==2.0.1
+https://github.com/explosion/spacy-models/releases/download/en_core_web_md-2.2.0/en_core_web_md-2.2.0.tar.gz#egg=en_core_web_md
